@@ -1,0 +1,82 @@
+<p>Check it out! Particle emitter.</p>
+<br />
+<canvas id='particle_canvas' style='border: 1px dashed'></canvas>
+<script>
+var scale = window.devicePixelRatio;
+function toHiDpiCanvas(canvas, width, height) {
+	canvas.style.width = width + 'px';
+	canvas.style.height = height + 'px';
+	canvas.width = width * scale;
+	canvas.height = height * scale;
+	canvas.getContext('2d').scale(scale, scale);
+	return canvas;
+}
+
+var canvas = document.getElementById('particle_canvas'),
+	context = canvas.getContext('2d');
+canvas = toHiDpiCanvas(canvas, 500, 300);
+
+var particles = {},
+	particleIndex = 0,
+	attributes = {
+		maxParticles: 1, // max particles generated during interval
+		radius: 10,
+		startX: canvas.width / 2,
+		startY:  canvas.height / 2,
+		gravity: -0.3,
+	};
+
+// document.body.appendChild(canvas);
+
+context.fillStyle = 'transparent';
+context.fillRect(0, 0, canvas.width, canvas.height);
+
+function particle() {
+	// scale start position if hidpi
+	if(scale != 1) {
+		this.xPos = attributes.startX / 2;
+		this.yPos = attributes.startY / 2;
+	}
+	else {
+		this.xPos = attributes.startX;
+		this.yPos = attributes.startY;
+	}
+	
+	this.xVelocity = Math.random() * 10 - 5;
+	this.yVelocity = Math.random() * 10 - 2;
+	
+	particleIndex++;
+	this.id = particleIndex;
+	particles[particleIndex] = this;
+	this.life = 0;
+	this.maxLife = 100;
+}
+
+particle.prototype.draw = function() {
+	this.xPos += this.xVelocity;
+	this.yPos += this.yVelocity;
+	this.yVelocity += attributes.gravity;
+	this.life++;
+	
+	if(this.life >= this.maxLife) {
+		delete particles[this.id];
+	}
+	
+	context.beginPath();
+	context.fillStyle = 'rgba(143, 234, 230, 0.5)';
+	context.arc(this.xPos, this.yPos, attributes.radius, 0, Math.PI*2, true);
+	context.closePath();
+	context.fill();
+}
+
+// note: requestAnimationFrame is generally preferred
+setInterval(function() {
+	context.clearRect(0,0,canvas.width,canvas.height);
+	for (var i = 0; i < attributes.maxParticles; i++) {
+			new particle();
+	}
+	for (var i in particles) {
+		particles[i].draw();
+	}
+}, 30);
+</script>

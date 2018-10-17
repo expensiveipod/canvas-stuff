@@ -1,0 +1,69 @@
+<style>
+.page {
+	position: relative;
+	margin-left: auto;
+	margin-right: auto;
+	padding-bottom: 10px;
+	height: 1350px;
+	width: 950px;
+}
+.testCanvas {
+	position: absolute;
+	top: 260px;
+	left: 32px;
+}
+</style>
+<div id="page" class="page">
+	<img src="/files/canvaspages/testpage.png" />
+	<canvas id="test_canvas" class="testCanvas"></canvas>
+</div>
+<script>
+var ratio = window.devicePixelRatio || 1;
+
+function toHiDpiCanvas(canvas, width, height) {
+	canvas.style.width = width + "px";
+	canvas.style.height = height + "px";
+	canvas.width = width * ratio;
+	canvas.height = height * ratio;
+	canvas.getContext("2d").scale(ratio, ratio);
+	return canvas;
+}
+
+var testCanvas = document.getElementById("test_canvas");
+var testContext = testCanvas.getContext("2d");
+if(ratio != 1) {
+	testCanvas = toHiDpiCanvas(testCanvas, 505, 325);
+}
+
+testContext.fillStyle = "rgba(143, 234, 230, 0.5)";
+testContext.fillRect(0, 0, testCanvas.width / ratio, testCanvas.height / ratio);
+
+testContext.font = "30px Lucida Console";
+testContext.fillStyle = "rgba(255, 0, 255, 1.0)";
+testContext.fillText("Try clicking this panel.", 50, 100);
+
+testCanvas.addEventListener("click", function(event) {
+	var fxCanvas = document.createElement("canvas");
+	fxCanvas.id = "fx_canvas";
+	fxCanvas.width = 700;
+	fxCanvas.height = 700;
+	fxCanvas.style.top = "0px";
+	fxCanvas.style.left = "0px";
+	fxCanvas.style.zIndex = 2;
+	fxCanvas.style.position = "absolute";
+	if(ratio != 1) {
+		fxCanvas = toHiDpiCanvas(fxCanvas, 700, 700);
+	}
+	var div = document.getElementById("page");
+	div.appendChild(fxCanvas);
+	var fxContext = fxCanvas.getContext("2d");
+	
+	fxContext.fillStyle = "rgba(0, 0, 255, 0.3)";
+	fxContext.fillRect(0, 0, fxCanvas.width, fxCanvas.height);
+	fxContext.clearRect(32, 260, testCanvas.width / ratio, testCanvas.height / ratio);
+	
+	fxCanvas.addEventListener("click", function(event) {
+		div.removeChild(fxCanvas);
+	}, false);
+}, false);
+</script>
